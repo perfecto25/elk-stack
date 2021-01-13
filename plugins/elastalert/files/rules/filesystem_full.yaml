@@ -1,0 +1,92 @@
+# Rule name, must be unique
+name: Alert on Full Filesystem
+is_enabled: true
+
+# Alert on x events in y seconds
+type: any
+
+# Alert when this many documents matching the query occur within a timeframe
+num_events: 1
+
+# num_events must occur within this amount of time to trigger an alert
+timeframe:
+  minutes: 10
+  
+filter:
+- type:
+    value: "doc"
+- query:
+  - query_string:
+      query: 'metricset.name: filesystem AND NOT cloud.provider : aws""'
+- query:
+  - query_string:
+      query: "system.filesystem.used.pct > .3"
+
+
+# A list of elasticsearch filters used for find events
+# These filters are joined with AND and nested in a filtered query
+# For more info: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl.html
+#thresholds: [0.8,0.9,0.95,1]
+#field_name: "system.filesystem.used.pct"
+#max_query_size: 1
+
+
+query_delay:
+  minutes: 1
+query_key: host
+
+#filter:
+#- query:
+#    query_string:
+#      query: "system.filesystem.used.pct > .7 AND system.filesystem.mount_point : (/home OR / OR /var) AND NOT cloud.provider : aws"
+
+query_delay:
+  minutes: 1
+
+index: metricbeat-*
+
+realert:
+  minutes: 5
+
+include:
+  - host.hostname
+  - system.filesystem.mount_point
+  - system.filesystem.total
+  - system.filesystem.type
+  - system.filesystem.used.bytes
+  - system.filesystem.used.pct
+
+include_match_in_root: true
+
+alert_subject: "Filesystem {} at 90% on <{}>"
+alert_subject_args:
+  - system.filesystem.mount_point
+  - host.hostname
+
+alert_text: |-
+  ALERT: File system is almost 100% full.
+  Take action to clean out this filesystem.
+  
+  Host: {}
+  Mount Point: {}
+  FS Type: {}
+  Usage (%): {}
+alert_text_args:
+  - host.hostname
+  - system.filesystem.mount_point
+  - system.filesystem.type
+  - system.filesystem.used.pct
+
+# The alert is use when a match is found
+alert:
+  #- email
+  - slack
+
+email:
+  - "infraalerts@company.com"
+
+slack_webhook_url: "https://hooks.slack.com/services/TXYZ123/ABC234"
+#slack_username_override: "ElastAlert"
+
+# Alert body only cointains a title and text
+alert_text_type: alert_text_only

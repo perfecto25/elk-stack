@@ -1,0 +1,75 @@
+# Rule name, must be unique
+name: File Integrity Changed
+
+# Alert on x events in y seconds
+type: frequency
+
+# Alert when this many documents matching the query occur within a timeframe
+num_events: 1
+  
+
+# num_events must occur within this amount of time to trigger an alert
+timeframe:
+  minutes: 30
+
+# A list of elasticsearch filters used for find events
+# These filters are joined with AND and nested in a filtered query
+# For more info: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl.html
+filter:
+- query:
+    query_string:
+      query: "event.module:file_integrity"
+
+index: auditbeat-*
+
+# When the attacker continues, send a new alert after x minutes
+realert:
+  minutes: 1
+
+query_key:
+  - file.path
+
+include:
+  - host.hostname
+  - user.name
+  - file.path
+  - file.mode
+  - file.group
+  - file.owner
+  - file.mtime
+
+include_match_in_root: true
+
+alert_subject: "File Integrity changed on <{}>"
+alert_subject_args:
+  - host.hostname
+
+alert_text: |-
+  File integrity changed on host {}.
+  File path: {}
+  File mode: {} 
+  File group: {}
+  File owner: {}
+  File modified time: {}
+
+alert_text_args:
+  - host.hostname
+  - file.path
+  - file.mode
+  - file.group
+  - file.owner
+  - file.mtime
+
+# The alert is use when a match is found
+alert:
+  #- email
+  - slack
+
+email:
+  - "alerts@company.com"
+
+slack_webhook_url: "https://hooks.slack.com/services/xyz123/abc123"
+#slack_username_override: "ElastAlert"
+
+# Alert body only cointains a title and text
+alert_text_type: alert_text_only

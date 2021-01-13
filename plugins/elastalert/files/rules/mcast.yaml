@@ -1,0 +1,61 @@
+name: Multicast Gap Detector
+is_enabled: true
+
+# Alert on x events in y seconds
+type: frequency
+
+# Alert when this many documents matching the query occur within a timeframe
+num_events: 1
+
+# num_events must occur within this amount of time to trigger an alert
+timeframe:
+  minutes: 5
+
+filter:
+- query:
+    query_string:
+      query: message:"Max attempts of retransmission failed" AND log.file.path:*mcast.log
+
+index: filebeat-*
+
+# if gaps continue send a new alert after x minutes
+realert:
+  minutes: 10
+
+query_key:
+  - log.file.path
+
+include:
+  - host.hostname
+  - log.file.path
+  - message
+
+include_match_in_root: true
+
+alert_subject: "Multicast data gaps detected on: <{}>"
+alert_subject_args:
+  - host.hostname
+
+alert_text: |-
+  Host: {}
+  File: {}
+  Message: {}
+
+alert_text_args:
+  - host.hostname
+  - log.file.path
+  - message
+
+# The alert is use when a match is found
+alert:
+  - email
+  - slack
+
+email:
+  - "infraalerts@company.com"
+  - "developers@company.com"
+
+slack_webhook_url: "https://hooks.slack.com/services/TXYZ123/ABC234"
+
+# Alert body only cointains a title and text
+alert_text_type: alert_text_only

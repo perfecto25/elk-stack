@@ -1,0 +1,4 @@
+include:
+    - .filebeat
+    - .metricbeat
+    - .auditbeat

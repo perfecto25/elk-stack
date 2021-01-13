@@ -1,0 +1,57 @@
+# Rule name, must be unique
+name: Sophos Virus detected
+
+# Alert on x events in y seconds
+type: frequency
+
+# Alert when this many documents matching the query occur within a timeframe
+num_events: 1
+
+# num_events must occur within this amount of time to trigger an alert
+timeframe:
+  hours: 6
+
+
+# A list of elasticsearch filters used for find events
+# These filters are joined with AND and nested in a filtered query
+# For more info: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl.html
+#filter:
+#- term:
+#    message: "virus detected"
+filter:
+- query:
+    query_string:
+      query: "message: virus detected: >>> "
+      
+query_key:
+  - message
+
+index: filebeat-*
+
+include:
+  - host.hostname
+  - message
+
+alert_subject: "Virus Detected on <{}>"
+alert_subject_args:
+  - host.hostname
+
+alert_text: |-
+  Message {}.
+  
+alert_text_args:
+  - message
+
+# The alert is use when a match is found
+alert:
+  - email
+  - slack
+
+email:
+  - "infraalerts@company.com"
+
+slack_webhook_url: "https://hooks.slack.com/services/TXYZ123/ABC234"
+#slack_username_override: "ElastAlert"
+
+# Alert body only cointains a title and text
+alert_text_type: alert_text_only

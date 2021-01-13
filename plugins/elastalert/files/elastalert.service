@@ -1,0 +1,14 @@
+[Unit]
+Description=ElastAlert Service
+After=network.target
+
+[Service]
+User=root
+Restart=always
+Type=simple
+WorkingDirectory=/etc/elasticsearch/elastalert
+ExecStart=/bin/pipenv run elastalert
+StandardOutput=null
+
+[Install]
+WantedBy=multi-user.target" 
