@@ -3,5 +3,5 @@ server.name: "elk-host"
 server.port: 5601
 elasticsearch.hosts: ["http://elastic:9200"]
 elasticsearch.username: elastic
-elasticsearch.password: kxQl0vQsFVrtNW8KpHXs
+elasticsearch.password: password123
 kibana.defaultAppId: "dashboard/42da0eb0-7838-11ea-bdc3-6b64d50124d6"
